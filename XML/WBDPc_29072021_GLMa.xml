@@ -1,0 +1,442 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<beast beautitemplate='Standard' beautistatus='noAutoSetClockRate' namespace="beast.core
+	:beast.evolution.alignment
+	:beast.evolution.tree.coalescent
+	:beast.core.util
+	:beast.evolution.nuc
+	:beast.evolution.operators
+	:beast.evolution.sitemodel
+	:beast.evolution.substitutionmodel
+	:beast.evolution.likelihood" required="" version="2.6"> 
+        
+
+<!-- Alignment -->
+    <data
+id="HAera"
+spec="feast.fileio.AlignmentFromFasta"
+fileName = "HAerasF.fas"
+name="alignment"/>
+                                
+    
+<!-- Map elements -->
+    <map name="Uniform" >beast.math.distributions.Uniform</map>
+    <map name="Exponential" >beast.math.distributions.Exponential</map>   
+    <map name="LogNormal" >beast.math.distributions.LogNormalDistributionModel</map> 
+    <map name="Normal" >beast.math.distributions.Normal</map> 
+    <map name="Beta" >beast.math.distributions.Beta</map>
+    <map name="Gamma" >beast.math.distributions.Gamma</map>
+    <map name="LaplaceDistribution" >beast.math.distributions.LaplaceDistribution</map>
+    <map name="prior" >beast.math.distributions.Prior</map>
+    <map name="InverseGamma" >beast.math.distributions.InverseGamma</map>
+    <map name="OneOnX" >beast.math.distributions.OneOnX</map>
+
+
+<!-- MCMC -->
+    <run id="mcmc" spec="MCMC" chainLength="2500000" numInitializationAttempts="100">
+            
+    <!-- State -->
+        <state id="state" spec="State" storeEvery="5000">        
+            <tree id="Tree.t:HAera" spec="beast.evolution.tree.Tree" name="stateNode">              
+                <trait id="dateTrait.t:HAera" spec="feast.fileio.TraitSetFromTaxonSet" 
+                	dateFormat="yyyy-M-dd" 
+                	traitname="date" 
+                	delimiter= "|"
+                	takeGroup="3">                                  
+                    <taxa id="TaxonSet.HAera" spec="TaxonSet">                                          
+                        <alignment idref="HAera"/>                                       
+                    </taxa>                               
+                </trait>                         
+                <taxonset idref="TaxonSet.HAera"/>                     
+            </tree>                 
+            <parameter id="kappa.s:HAera" spec="parameter.RealParameter" lower="0.0" name="stateNode">2.0</parameter>                  
+            <parameter id="ucldStdev.c:HAera" spec="parameter.RealParameter" lower="0.0" name="stateNode">0.1</parameter>                  
+            <stateNode id="rateCategories.c:HAera" spec="parameter.IntegerParameter" dimension="484">1</stateNode>                 
+            <parameter id="originBDMMPrime.t:HAera" spec="parameter.RealParameter" name="stateNode">2.0</parameter>                 
+            <parameter id="R0Epi.t:HAera" spec="parameter.RealParameter" dimension="20" name="stateNode">1.0 1.01 1.02 1.03 1.04 1.0 1.01 1.02 1.03 1.04 1.0 1.01 1.02 1.03 1.04 1.0 1.01 1.02 1.03 1.04</parameter>               
+            <parameter id="becomeUninfectiousRateEpi.t:HAera" spec="parameter.RealParameter" dimension="5" name="stateNode">1.0 1.0 1.0 1.0 1.0</parameter>
+            <parameter id="samplingProportionEpi.t:HAera" spec="parameter.RealParameter" dimension="5" lower="0.0" name="stateNode" upper="1.0">
+                0.70 0.60 0.10 0.50 0.01</parameter>                  
+            <!-- 
+	    <parameter id="migrationRateEpi.t:HAera" spec="parameter.RealParameter" dimension="20" name="stateNode">0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0 1.0 1.0 1.0 1.0</parameter>                 
+            -->
+            <parameter id="R0AmongDemesnoGLM" spec="parameter.RealParameter" dimension="8" name="stateNode">1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0</parameter>
+            <parameter id="scalerParamGLM2" spec="parameter.RealParameter" dimension="8" name="stateNode">0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1</parameter>
+            <parameter id="globalScalerParamGLM2" spec="parameter.RealParameter" name="stateNode">1.0</parameter>
+            <parameter id="indicatorParamGLM2" spec="parameter.BooleanParameter" dimension="8" name="stateNode">1 1 1 1 1 1 1 1</parameter>               
+	        <parameter id="ucldMean.c:HAera" spec="parameter.RealParameter" name="stateNode">1.0E-4</parameter>                  
+            <parameter id="gammaShape.s:HAera" spec="parameter.RealParameter" name="stateNode">1.0</parameter>                  
+            <parameter id="freqParameter.s:HAera" spec="parameter.RealParameter" dimension="4" lower="0.0" name="stateNode" upper="1.0">0.25</parameter>              
+        </state>
+        
+
+    <!-- Tree initialiser -->    
+        <init id="RandomTree.t:HAera" spec="beast.evolution.tree.RandomTree" estimate="false" initial="@Tree.t:HAera" taxa="@HAera">                
+            <populationModel id="ConstantPopulation0.t:HAera" spec="ConstantPopulation">                       
+                <parameter id="randomPopSize.t:HAera" spec="parameter.RealParameter" name="popSize">0.001</parameter>                    
+            </populationModel>             
+        </init>
+        
+    
+    <!-- Posterior Distribution -->
+        <distribution id="posterior" spec="util.CompoundDistribution">
+           
+            <!-- Prior distribution -->         
+            <distribution id="prior" spec="util.CompoundDistribution">
+                           
+                <!-- BDMM-Prime distribution --> 
+                <distribution id="BDMMPrime.t:HAera" spec="bdmmprime.distribution.BirthDeathMigrationDistribution" conditionOnSurvival="false" tree="@Tree.t:HAera">
+                    
+                    <!-- Parameterization BDMM-Prime -->
+                    <parameterization id="EpiBDMMPrimeParameterization.t:HAera" spec="bdmmprime.parameterization.EpiParameterization" origin="@originBDMMPrime.t:HAera">
+                                            
+                        <R0 id="R0SVEpi.t:HAera" spec="bdmmprime.parameterization.SkylineVectorParameter" origin="@originBDMMPrime.t:HAera" skylineValues="@R0Epi.t:HAera" timesAreAges="true">                                                
+                            <parameter id="R0ChangeTimesEpi.t:HAera" spec="parameter.RealParameter" dimension="3" estimate="false" lower="0.0" name="changeTimes">0.265 0.350 0.435</parameter>                                                
+                            <typeSet id="typeSetBDMMPrime.t:HAera" spec="bdmmprime.parameterization.TypeSet">                                                      
+                                <typeTraitSet id="typeTraitSet.t:HAera" spec="feast.fileio.TraitSetFromTaxonSet" traitname="type" delimiter="|" takeGroup="1">    
+                                    <taxa id="TaxonSet.1" spec="TaxonSet" alignment="@HAera"/>                                                             
+                                </typeTraitSet>                                                    
+                            </typeSet>                                          
+                        </R0>
+                                            
+                        <becomeUninfectiousRate id="becomeUninfectiousRateSVEpi.t:HAera" spec="bdmmprime.parameterization.SkylineVectorParameter" origin="@originBDMMPrime.t:HAera" skylineValues="@becomeUninfectiousRateEpi.t:HAera" timesAreAges="true" typeSet="@typeSetBDMMPrime.t:HAera"/>
+                                            
+                        <samplingProportion id="samplingProportionSVEpi.t:HAera" spec="bdmmprime.parameterization.SkylineVectorParameter" origin="@originBDMMPrime.t:HAera" skylineValues="@samplingProportionEpi.t:HAera" timesAreAges="true" typeSet="@typeSetBDMMPrime.t:HAera"/>                                           
+                            <!--
+                            <parameter id="samplingProportionChangeTimesEpi.t:HAera" spec="parameter.RealParameter" estimate="false" lower="0.0" name="changeTimes">0.350 0.438 0.498 0.520 0.555</parameter>                                          
+                        </samplingProportion> -->
+                                            
+                        <rhoSampling id="rhoSamplingProbTPEpi.t:HAera" spec="bdmmprime.parameterization.TimedParameter" origin="@originBDMMPrime.t:HAera" timesAreAges="true" typeSet="@typeSetBDMMPrime.t:HAera"/>
+                                            
+                        <removalProb id="removalProbSVEpi.t:HAera" spec="bdmmprime.parameterization.SkylineVectorParameter" origin="@originBDMMPrime.t:HAera" timesAreAges="true" typeSet="@typeSetBDMMPrime.t:HAera">                                              
+                            <parameter id="removalProbEpi.t:HAera" spec="parameter.RealParameter" estimate="false" lower="0.0" name="skylineValues" upper="1.0">1.0</parameter>                                     
+                        </removalProb>
+                        
+			<!--                    
+                        <migrationRate id="migrationRateSMEpi.t:HAera" spec="bdmmprime.parameterization.SkylineMatrixParameter" origin="@originBDMMPrime.t:HAera" skylineValues="@migrationRateEpi.t:HAera" timesAreAges="true" typeSet="@typeSetBDMMPrime.t:HAera"/>
+                        --> 
+                    
+                        <R0AmongDemes id="R0AmongDemesSMEpi.t:HAera" spec="bdmmprime.parameterization.SkylineMatrixParameter" origin="@originBDMMPrime.t:HAera" timesAreAges="true" typeSet="@typeSetBDMMPrime.t:HAera">
+                        <skylineValues spec="feast.function.Concatenate" id="R0AmongDemesEpi.t:HAera">
+                                <arg spec="bdmmprime.util.priors.MigRateGLM" id="R0AmongDemesGLM1">
+                                        <parameter id="covariateListGLM21" spec="feast.fileio.RealParameterFromLabelledXSV" name="covariateList"
+                                            fileName="matrix_GLM.csv"
+                                            sep="," 
+                                            rowLabels="CR1,CR3,CR6,CR7,CR8,CR9,CR10,CR11"
+                                            colLabels="GE,HU,PO"/>
+                                        <!-- <covariateList spec="parameter.RealParameter" dimension="6">1.0 1.0 1.0 1.0 1.0 1.0</covariateList>   -->
+                                        <parameter idref="scalerParamGLM2" name="scalerParam"/>
+                                        <parameter idref="globalScalerParamGLM2" name="globalScalerParam"/>
+                                        <parameter idref="indicatorParamGLM2" name="indicatorParam"/>
+                                </arg>
+                                <arg spec="feast.function.Slice" arg="@R0AmongDemesnoGLM" index="0" count="1"/>
+                                <!-- <arg spec="parameter.RealParameter" dimension="1">1.0</arg>   -->
+                                <arg spec="bdmmprime.util.priors.MigRateGLM" id="R0AmongDemesGLM2">
+                                        <parameter id="covariateListGLM22" spec="feast.fileio.RealParameterFromLabelledXSV" name="covariateList"
+                                            fileName="matrix_GLM.csv"
+                                            sep="," 
+                                            rowLabels="GE1,GE3,GE6,GE7,GE8,GE9,GE10,GE11"
+                                            colLabels="CR,HU,PO"/>
+                                        <!-- <covariateList spec="parameter.RealParameter" dimension="6">1.0 1.0 1.0 1.0 1.0 1.0</covariateList>   -->
+                                        <parameter idref="scalerParamGLM2" name="scalerParam"/>
+                                        <parameter idref="globalScalerParamGLM2" name="globalScalerParam"/>
+                                        <parameter idref="indicatorParamGLM2" name="indicatorParam"/>
+                                </arg>
+                                <arg spec="feast.function.Slice" arg="@R0AmongDemesnoGLM" index="1" count="1"/>
+                                <!-- <arg spec="parameter.RealParameter" dimension="1">1.0</arg>   -->
+                                <arg spec="bdmmprime.util.priors.MigRateGLM" id="R0AmongDemesGLM3">
+                                        <parameter id="covariateListGLM23" spec="feast.fileio.RealParameterFromLabelledXSV" name="covariateList"
+                                            fileName="matrix_GLM.csv"
+                                            sep="," 
+                                            rowLabels="HU1,HU3,HU6,HU7,HU8,HU9,HU10,HU11"
+                                            colLabels="CR,GE,PO"/>
+                                        <!-- <covariateList spec="parameter.RealParameter" dimension="6">1.0 1.0 1.0 1.0 1.0 1.0</covariateList>   -->
+                                        <parameter idref="scalerParamGLM2" name="scalerParam"/>
+                                        <parameter idref="globalScalerParamGLM2" name="globalScalerParam"/>
+                                        <parameter idref="indicatorParamGLM2" name="indicatorParam"/>
+                                </arg>
+                                <arg spec="feast.function.Slice" arg="@R0AmongDemesnoGLM" index="2" count="1"/>
+                                <!-- <arg spec="parameter.RealParameter" dimension="1">1.0</arg>   -->
+                                <arg spec="bdmmprime.util.priors.MigRateGLM" id="R0AmongDemesGLM4">
+                                        <parameter id="covariateListGLM24" spec="feast.fileio.RealParameterFromLabelledXSV" name="covariateList"
+                                            fileName="matrix_GLM.csv"
+                                            sep="," 
+                                            rowLabels="PO1,PO3,PO6,PO7,PO8,PO9,PO10,PO11"
+                                            colLabels="CR,GE,HU"/>
+                                        <!-- <covariateList spec="parameter.RealParameter" dimension="6">1.0 1.0 1.0 1.0 1.0 1.0</covariateList>   -->
+                                        <parameter idref="scalerParamGLM2" name="scalerParam"/>
+                                        <parameter idref="globalScalerParamGLM2" name="globalScalerParam"/>
+                                        <parameter idref="indicatorParamGLM2" name="indicatorParam"/>
+                                </arg>
+                                <arg spec="feast.function.Slice" arg="@R0AmongDemesnoGLM" index="3" count="5"/>
+                            </skylineValues>
+                        </R0AmongDemes> 
+			<!--			
+<parameter id="R0AmongDemesEpi.t:HAera" spec="parameter.RealParameter" estimate="false" name="skylineValues">0.0</parameter>
+			-->
+                                            
+                        <typeSet idref="typeSetBDMMPrime.t:HAera"/>
+                                        
+                    </parameterization>
+                                    
+                    <parameter id="typeFrequencies.t:HAera" spec="parameter.RealParameter" dimension="5" estimate="false" lower="0.0" name="frequencies" upper="1.0">0.0 0.0 0.0 0.0 1.0</parameter>
+                                    
+                    <typeTraitSet idref="typeTraitSet.t:HAera"/>
+                                
+                </distribution>
+                
+		<!-- Priors on parameters -->            
+                
+                <distribution id="R0EpiDeme1" spec="bdmmprime.util.priors.OUSkyGridPrior2" x="@R0Epi.t:HAera" classToExclude="1.01 1.02 1.03 1.04">
+					<parameter id="RealParameter.1" spec="parameter.RealParameter" estimate="false" name="M">0.0</parameter>
+					<parameter id="RealParameter.2" spec="parameter.RealParameter" estimate="false" lower="0.0" name="S" upper="5.0">1.0</parameter>
+            		<parameter id="theta.1" spec="parameter.RealParameter" estimate="false" lower="0.0" name="theta" upper="5.0">1.0</parameter> 
+                </distribution>
+                <distribution id="R0EpiDeme2" spec="bdmmprime.util.priors.OUSkyGridPrior2" x="@R0Epi.t:HAera" classToExclude="1.0 1.02 1.03 1.04">
+								<parameter id="RealParameter.3" spec="parameter.RealParameter" estimate="false" name="M">0.0</parameter>
+								<parameter id="RealParameter.4" spec="parameter.RealParameter" estimate="false" lower="0.0" name="S" upper="5.0">1.0</parameter>
+                        		<parameter id="theta.2" spec="parameter.RealParameter" estimate="false" lower="0.0" name="theta" upper="5.0">1.0</parameter> 
+                </distribution>
+  				<distribution id="R0EpiDeme3" spec="bdmmprime.util.priors.OUSkyGridPrior2" x="@R0Epi.t:HAera" classToExclude="1.0 1.01 1.03 1.04">
+								<parameter id="RealParameter.5" spec="parameter.RealParameter" estimate="false" name="M">0.0</parameter>
+								<parameter id="RealParameter.6" spec="parameter.RealParameter" estimate="false" lower="0.0" name="S" upper="5.0">1.0</parameter>
+                        		<parameter id="theta.3" spec="parameter.RealParameter" estimate="false" lower="0.0" name="theta" upper="5.0">1.0</parameter> 
+                </distribution>
+                <distribution id="R0EpiDeme4" spec="bdmmprime.util.priors.OUSkyGridPrior2" x="@R0Epi.t:HAera" classToExclude="1.0 1.01 1.02 1.04">
+								<parameter id="RealParameter.7" spec="parameter.RealParameter" estimate="false" name="M">0.0</parameter>
+								<parameter id="RealParameter.8" spec="parameter.RealParameter" estimate="false" lower="0.0" name="S" upper="5.0">1.0</parameter>
+                        		<parameter id="theta.4" spec="parameter.RealParameter" estimate="false" lower="0.0" name="theta" upper="5.0">1.0</parameter> 
+                </distribution>
+                <distribution id="R0EpiDeme5" spec="bdmmprime.util.priors.OUSkyGridPrior2" x="@R0Epi.t:HAera" classToExclude="1.0 1.01 1.02 1.03">
+								<parameter id="RealParameter.9" spec="parameter.RealParameter" estimate="false" name="M">0.0</parameter>
+								<parameter id="RealParameter.10" spec="parameter.RealParameter" estimate="false" lower="0.0" name="S" upper="5.0">1.0</parameter>
+                        		<parameter id="theta.5" spec="parameter.RealParameter" estimate="false" lower="0.0" name="theta" upper="5.0">1.0</parameter> 
+                </distribution>
+
+                <distribution id="becomeUninfectiousRateEpiPrior.t:HAera" spec="bdmmprime.util.priors.ZeroExcludingPrior" x="@becomeUninfectiousRateEpi.t:HAera">    
+                	<LogNormal id="LogNormalDistributionModel.5" meanInRealSpace="true" name="distr">                                         
+                        <parameter id="RealParameter.11" spec="parameter.RealParameter" estimate="false" name="M">52.0</parameter> 
+                        <parameter id="RealParameter.12" spec="parameter.RealParameter" estimate="false" lower="0.0" name="S" upper="5.0">0.6</parameter>
+                    </LogNormal>                             
+                </distribution>
+                            
+                <prior id="FrequenciesPrior.s:HAera" name="distribution" x="@freqParameter.s:HAera">                                
+                    <Uniform id="Uniform.1" name="distr"/>                              
+                </prior>
+                            
+                <prior id="GammaShapePrior.s:HAera" name="distribution" x="@gammaShape.s:HAera">                                  
+                    <Exponential id="Exponential.1" name="distr">                                     
+                        <parameter id="RealParameter.13" spec="parameter.RealParameter" estimate="false" name="mean">1.0</parameter>                                      
+                    </Exponential>                              
+                </prior>
+                            
+                <prior id="KappaPrior.s:HAera" name="distribution" x="@kappa.s:HAera">                                  
+                    <LogNormal id="LogNormalDistributionModel.2" name="distr">                                          
+                        <parameter id="RealParameter.14" spec="parameter.RealParameter" estimate="false" name="M">1.0</parameter>
+                        <parameter id="RealParameter.15" spec="parameter.RealParameter" estimate="false" name="S">1.25</parameter>
+                    </LogNormal>                               
+                </prior>
+                
+		<!--                
+                <distribution id="migrationRateEpiPrior.t:HAera" spec="bdmmprime.util.priors.ZeroExcludingPrior" x="@migrationRateEpi.t:HAera">                                   
+                    <LogNormal id="LogNormalDistributionModel.4" name="distr">                                          
+                        <parameter id="RealParameter.15" spec="parameter.RealParameter" estimate="false" name="M">1.0</parameter>                                           
+                        <parameter id="RealParameter.16" spec="parameter.RealParameter" estimate="false" lower="0.0" name="S" upper="5.0">1.25</parameter>                                       
+                    </LogNormal>                               
+                </distribution>
+                --> 
+                <prior id="scalerParamPrior2" name="distribution" x="@scalerParamGLM2">
+                    <Normal id="Normal.GLM2" name="distr">
+                        <parameter id="RealParameter.GLM21" spec="parameter.RealParameter" estimate="false" name="mean">0.0</parameter>
+                        <parameter id="RealParameter.GLM22" spec="parameter.RealParameter" estimate="false" name="sigma">2.0</parameter>
+                    </Normal>
+                </prior>
+
+                <prior id="globalScalerParamPrior2" name="distribution" x="@globalScalerParamGLM2">
+                    <LogNormal id="LogNormalDistributionModel.GLM2" name="distr">
+                        <parameter id="RealParameter.GLM23" spec="parameter.RealParameter" estimate="false" name="M">0</parameter>
+                        <parameter id="RealParameter.GLM24" spec="parameter.RealParameter" estimate="false" lower="0.0" name="S" upper="5.0">1</parameter>
+                    </LogNormal>
+                </prior>
+
+		       <distribution id="R0AmongDemesEpiPrior.t:HAera" spec="bdmmprime.util.priors.ZeroExcludingPrior" x="@R0AmongDemesnoGLM">     
+		       		<LogNormal id="LogNormalDistributionModel.4" name="distr">                                        
+                        <parameter id="RealParameter.16" spec="parameter.RealParameter" estimate="false" name="M">0.0</parameter>
+                        <parameter id="RealParameter.17" spec="parameter.RealParameter" estimate="false" lower="0.0" name="S" upper="5.0">1.0</parameter>
+                    </LogNormal>                             
+                </distribution>
+            
+                <prior id="originBDMMPrimePrior.t:HAera" name="distribution" x="@originBDMMPrime.t:HAera">                                  
+                    <LogNormal id="LogNormalDistributionModel.6" name="distr">                                           
+                        <parameter id="RealParameter.18" spec="parameter.RealParameter" estimate="false" name="M">-0.2</parameter>
+                        <parameter id="RealParameter.19" spec="parameter.RealParameter" estimate="false" lower="0.0" name="S" upper="5.0">0.2</parameter>
+                    </LogNormal>                              
+                </prior>
+                
+		<!--            
+                <distribution id="samplingProportionEpiPrior.t:HAera" spec="bdmmprime.util.priors.ZeroExcludingPrior" x="@samplingProportionEpi.t:HAera">                                  
+                    <Uniform id="Uniform.5" name="distr" lower="0" upper="1"/>                              
+                </distribution>
+                -->
+
+		<!-- Prior for sampling proportion for Poultry Farms Czech Republic Epoch 1 -->
+		<distribution id="sp1" spec="bdmmprime.util.priors.ZeroExcludingPrior">
+			<x spec="feast.function.Slice" arg="@samplingProportionEpi.t:HAera" index="0" count="1"/>
+			<distr spec="beast.math.distributions.Uniform" lower="0.553" upper="0.837"/>
+		</distribution>
+		<!-- Prior for sampling proportion for Poultry Farms Germany Epoch 1 -->
+		<distribution id="sp2" spec="bdmmprime.util.priors.ZeroExcludingPrior">
+			<x spec="feast.function.Slice" arg="@samplingProportionEpi.t:HAera" index="1" count="1"/>
+			<distr spec="beast.math.distributions.Uniform" lower="0.560" upper="0.840"/>
+		</distribution>
+		<!-- Prior for sampling proportion for Poultry Farms Hungary Epoch 1 -->
+		<distribution id="sp3" spec="bdmmprime.util.priors.ZeroExcludingPrior">
+			<x spec="feast.function.Slice" arg="@samplingProportionEpi.t:HAera" index="2" count="1"/>
+			<distr spec="beast.math.distributions.Uniform" lower="0.083" upper="0.125"/>
+		</distribution>
+		<!-- Prior for sampling proportion for Poultry Farms Poland Epoch 1 -->
+		<distribution id="sp4" spec="bdmmprime.util.priors.ZeroExcludingPrior">
+			<x spec="feast.function.Slice" arg="@samplingProportionEpi.t:HAera" index="3" count="1"/>
+			<distr spec="beast.math.distributions.Uniform" lower="0.459" upper="0.692"/>
+		</distribution>
+		<!-- Prior for sampling proportion for Wild Birds Epoch 1 -->
+		<distribution id="sp5" spec="bdmmprime.util.priors.ZeroExcludingPrior">
+			<x spec="feast.function.Slice" arg="@samplingProportionEpi.t:HAera" index="4" count="1"/>
+			<distr spec="beast.math.distributions.Uniform" lower="0" upper="0.349"/>
+		</distribution>
+            
+                <prior id="MeanRatePrior.c:HAera" name="distribution" x="@ucldMean.c:HAera">                                  
+                    <LogNormal id="LogNormalDistributionModel.7" meanInRealSpace="true" name="distr">                                          
+                        <parameter id="RealParameter.20" spec="parameter.RealParameter" estimate="false" name="M">0.001</parameter>
+                        <parameter id="RealParameter.21" spec="parameter.RealParameter" estimate="false" lower="0.0" name="S" upper="5.0">1.25</parameter>
+                    </LogNormal>                            
+                </prior>
+                            
+                <prior id="ucldStdevPrior.c:HAera" name="distribution" x="@ucldStdev.c:HAera">                                 
+                    <Gamma id="Gamma.0" name="distr">                                          
+                        <parameter id="RealParameter.22" spec="parameter.RealParameter" estimate="false" name="alpha">0.5396</parameter>
+                        <parameter id="RealParameter.23" spec="parameter.RealParameter" estimate="false" name="beta">0.3819</parameter>
+                    </Gamma>                              
+                </prior>                     
+            </distribution>
+            
+
+             <!-- Likelihood -->        
+            <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="true">                           
+                <distribution id="treeLikelihood.HAera" spec="ThreadedTreeLikelihood" data="@HAera" tree="@Tree.t:HAera">                                   
+                    
+		    <siteModel id="SiteModel.s:HAera" spec="SiteModel" gammaCategoryCount="4" shape="@gammaShape.s:HAera">                                            
+                        <parameter id="mutationRate.s:HAera" spec="parameter.RealParameter" estimate="false" name="mutationRate">1.0</parameter>
+                        <parameter id="proportionInvariant.s:HAera" spec="parameter.RealParameter" estimate="false" lower="0.0" name="proportionInvariant" upper="1.0">0.0</parameter>                                           
+                        <substModel id="hky.s:HAera" spec="HKY" kappa="@kappa.s:HAera">                                                  
+                            <frequencies id="estimatedFreqs.s:HAera" spec="Frequencies" frequencies="@freqParameter.s:HAera"/>
+                        </substModel>                                       
+            </siteModel>
+                                    
+                    <branchRateModel id="RelaxedClock.c:HAera" spec="beast.evolution.branchratemodel.UCRelaxedClockModel" clock.rate="@ucldMean.c:HAera" rateCategories="@rateCategories.c:HAera" tree="@Tree.t:HAera">                                         
+                        <LogNormal id="LogNormalDistributionModel.c:HAera" S="@ucldStdev.c:HAera" meanInRealSpace="true" name="distr">    
+                        	<parameter id="RealParameter.24" spec="parameter.RealParameter" estimate="false" lower="0.0" name="M" upper="1.0">1.0</parameter>
+                        </LogNormal>                                     
+                    </branchRateModel>
+                                
+                </distribution>                      
+            </distribution>              
+        </distribution>
+            
+	<!-- Operators -->
+        <operator id="KappaScaler.s:HAera" spec="ScaleOperator" parameter="@kappa.s:HAera" scaleFactor="0.5" weight="0.1"/>           
+        <operator id="ucldStdevScaler.c:HAera" spec="ScaleOperator" parameter="@ucldStdev.c:HAera" scaleFactor="0.5" weight="3.0"/>           
+        <operator id="CategoriesRandomWalk.c:HAera" spec="IntRandomWalkOperator" parameter="@rateCategories.c:HAera" weight="10.0" windowSize="1"/>           
+        <operator id="CategoriesSwapOperator.c:HAera" spec="SwapOperator" intparameter="@rateCategories.c:HAera" weight="10.0"/>           
+        <operator id="CategoriesUniform.c:HAera" spec="UniformOperator" parameter="@rateCategories.c:HAera" weight="10.0"/>           
+        <!-- <operator id="BDMMPrimeLeafToSA.t:HAera" spec="LeafToSampledAncestorJump" tree="@Tree.t:HAera" weight="10.0"/>            -->
+        <operator id="BDMMPrimeWilsonBalding.t:HAera" spec="WilsonBalding" tree="@Tree.t:HAera" weight="10.0"/>           
+        <operator id="BDMMPrimeWide.t:HAera" spec="Exchange" isNarrow="false" tree="@Tree.t:HAera" weight="10.0"/>           
+        <operator id="BDMMPrimeNarrow.t:HAera" spec="Exchange" tree="@Tree.t:HAera" weight="10.0"/>            
+        <operator id="BDMMPrimeUniformOperator.t:HAera" spec="Uniform" tree="@Tree.t:HAera" weight="20.0"/>          
+        <operator id="BDMMPrimeTreeRootScaler.t:HAera" spec="ScaleOperator" rootOnly="true" scaleFactor="0.95" tree="@Tree.t:HAera" weight="1.0"/>           
+        <operator id="BDMMPrimeTreeScaler.t:HAera" spec="ScaleOperator" scaleFactor="0.95" tree="@Tree.t:HAera" weight="3.0"/>           
+        <operator id="originBDMMPrimeScaler.t:HAera" spec="ScaleOperator" parameter="@originBDMMPrime.t:HAera" scaleFactor="0.75" weight="3.0"/>            
+        <operator id="R0EpiScaler.t:HAera" spec="ScaleOperator" parameter="@R0Epi.t:HAera" scaleFactor="0.75" weight="3.0"/>            
+        <operator id="becomeUninfectiousRateEpiScaler.t:HAera" spec="ScaleOperator" parameter="@becomeUninfectiousRateEpi.t:HAera" scaleFactor="0.75" weight="3.0"/>           
+        <!--
+        <operator id="samplingProportionEpiScaler.t:HAera" spec="bdmmprime.util.operators.SmartScaleOperator" parameter="@samplingProportionEpi.t:HAera" scaleFactor="0.75" weight="3.0"/>
+    -->
+        <operator id="samplingProportionEpiScaler.t:HAera" spec="ScaleOperator" parameter="@samplingProportionEpi.t:HAera" scaleFactor="0.75" weight="3.0"/>          
+        <!-- 
+	<operator id="migrationRateEpiScaler.t:HAera" spec="ScaleOperator" parameter="@migrationRateEpi.t:HAera" scaleFactor="0.75" weight="3.0"/>          
+	-->
+		<operator id="R0AmongDemesScaler.t:HAera" spec="ScaleOperator" parameter="@R0AmongDemesnoGLM" scaleFactor="0.75" weight="3.0"/>
+        <operator id="scalerParamGLMScaler2" spec="RealRandomWalkOperator" windowSize="3" parameter="@scalerParamGLM2" weight="3.0"/>
+        <operator id="globalScalerParamGLMScaler2" spec="ScaleOperator" parameter="@globalScalerParamGLM2" scaleFactor="0.75" weight="3.0"/>
+        <operator id="indicatorParamGLMScaler2" spec="BitFlipOperator" parameter="@indicatorParamGLM2" uniform="false" weight="3.0"/>                
+		<operator id="ucldMeanScaler.c:HAera" spec="ScaleOperator" parameter="@ucldMean.c:HAera" scaleFactor="0.5" weight="1.0"/>          
+        <operator id="relaxedUpDownOperator.c:HAera" spec="UpDownOperator" scaleFactor="0.75" weight="3.0">                  
+            <up idref="ucldMean.c:HAera"/>                   
+            <down idref="Tree.t:HAera"/>                
+        </operator>           
+        <operator id="gammaShapeScaler.s:HAera" spec="ScaleOperator" parameter="@gammaShape.s:HAera" scaleFactor="0.5" weight="0.1"/>           
+        <operator id="FrequenciesExchanger.s:HAera" spec="DeltaExchangeOperator" delta="0.01" weight="0.1">                   
+            <parameter idref="freqParameter.s:HAera"/>              
+        </operator>
+            
+        <logger id="tracelog" spec="Logger" fileName="HAera.log" logEvery="10000" model="@posterior" sanitiseHeaders="true" sort="smart">                  
+            <log idref="posterior"/>                  
+            <log idref="likelihood"/>                   
+            <log idref="prior"/>                   
+            <log idref="treeLikelihood.HAera"/>                   
+            <log id="TreeHeight.t:HAera" spec="beast.evolution.tree.TreeHeightLogger" tree="@Tree.t:HAera"/>                   
+            <log idref="kappa.s:HAera"/>                  
+            <log idref="ucldStdev.c:HAera"/>                   
+            <log id="rate.c:HAera" spec="beast.evolution.branchratemodel.RateStatistic" branchratemodel="@RelaxedClock.c:HAera" tree="@Tree.t:HAera"/>                 
+            <log idref="originBDMMPrime.t:HAera"/>                   
+            <!-- 
+	    <log id="typedTreeStats.t:HAera" spec="bdmmprime.mapping.TypedTreeStatsLogger" includeRootEdgeChanges="true" typeLabel="type" typeSet="@typeSetBDMMPrime.t:HAera">                        
+                <typedTree id="typeMappedTree.t:HAera" spec="bdmmprime.mapping.TypeMappedTree" bdmmDistrib="@BDMMPrime.t:HAera" frequencies="@typeFrequencies.t:HAera" mapOnInit="false" remapOnLog="true" typeLabel="type" typeTraitSet="@typeTraitSet.t:HAera" untypedTree="@Tree.t:HAera"/>                     
+            </log>      
+	    -->              
+            <log idref="R0SVEpi.t:HAera"/>                  
+            <log idref="R0AmongDemesSMEpi.t:HAera"/>                  
+            <log idref="becomeUninfectiousRateSVEpi.t:HAera"/>
+	    <!--                  
+            <log idref="migrationRateSMEpi.t:HAera"/> 
+            -->                  
+            <log idref="samplingProportionSVEpi.t:HAera"/>                   
+            <log idref="removalProbSVEpi.t:HAera"/>                   
+            <log idref="rhoSamplingProbTPEpi.t:HAera"/>                   
+            <log idref="ucldMean.c:HAera"/>                   
+            <log idref="gammaShape.s:HAera"/>                   
+            <log idref="freqParameter.s:HAera"/>
+            <log idref="scalerParamGLM2"/>
+            <log idref="globalScalerParamGLM2"/>
+            <log idref="indicatorParamGLM2"/>               
+        </logger>
+            
+        <logger id="screenlog" spec="Logger" logEvery="10000">           
+            <log idref="posterior"/>                    
+            <log idref="likelihood"/>                  
+            <log idref="prior"/>               
+        </logger>
+            
+        <logger id="treelog.t:HAera" spec="Logger" fileName="$(tree).trees" logEvery="10000" mode="tree">                   
+            <log id="TreeWithMetaDataLogger.t:HAera" spec="beast.evolution.tree.TreeWithMetaDataLogger" branchratemodel="@RelaxedClock.c:HAera" tree="@Tree.t:HAera"/>               
+        </logger>
+            
+	<!--        
+	<logger id="typedTreeLogger.t:HAera" spec="bdmmprime.util.OptionalLogger" enableLogger="true" fileName="$(filebase).$(tree).typed.trees" logEvery="10000" mode="tree">                  
+            <log idref="typeMappedTree.t:HAera"/>               
+        </logger>
+            
+        <logger id="nodeTypedTreeLogger.t:HAera" spec="bdmmprime.util.OptionalLogger" enableLogger="true" fileName="$(filebase).$(tree).typed.node.trees" logEvery="10000" mode="tree">                
+            <log id="nodeTypedTree.t:HAera" spec="bdmmprime.mapping.TypedNodeTreeLogger" typedTree="@typeMappedTree.t:HAera"/>              
+        </logger>
+            
+        <logger id="trajLogger.t:HAera" spec="bdmmprime.util.OptionalLogger" enableLogger="true" fileName="$(filebase).$(tree).traj" logEvery="10000">                 
+            <log id="typedTraj.t:HAera" spec="bdmmprime.trajectories.SampledTrajectory" bdmmDistrib="@BDMMPrime.t:HAera" frequencies="@typeFrequencies.t:HAera" typeMappedTree="@typeMappedTree.t:HAera" useTauLeaping="true"/>             
+        </logger>
+        -->
+           
+        <operatorschedule id="OperatorSchedule" spec="OperatorSchedule"/>
+        
+    </run>
+    
+</beast>
