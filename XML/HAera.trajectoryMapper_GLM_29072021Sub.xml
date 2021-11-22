@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<beast namespace="beast.core
+                  :beast.core.parameter
+                  :beast.evolution.alignment
+                  :beast.evolution.tree
+                  :feast.expressions
+                  :feast.function
+                  :feast.fileio
+                  :feast.fileio.logfileiterator
+                  :bdmmprime.distribution
+                  :bdmmprime.parameterization
+                  :bdmmprime.mapping" version="2.0">
+
+
+  <!-- Alignment-->
+  <data
+  id="HAera"
+  spec= "feast.fileio.AlignmentFromFasta"
+  fileName = "/cluster/home/cguinat/scratch/BDMM_EUR/Mapper_GLM_29072021Sub/HAerasF.fas"  
+  name="alignment"/>
+
+  <!-- Modify parameterization to match the one from the analysis-->
+  <distribution id="BDMMPrime" spec="BirthDeathMigrationDistribution" conditionOnSurvival="false" tree="@tree"> 
+    <parameterization id="EpiBDMMPrimeParameterization" spec="EpiParameterization" origin="@origin">
+      
+      <R0 spec="SkylineVectorParameter" typeSet="@typeSet" timesAreAges="true" origin="@origin">
+        <skylineValues idref="R0"/>
+        <parameter id="R0ChangeTimes" spec="RealParameter" name="changeTimes">0.265 0.350 0.435</parameter>
+      </R0>
+
+      <R0AmongDemes spec="SkylineMatrixParameter" timesAreAges="true" typeSet="@typeSet" origin="@origin">
+        <skylineValues idref="R0AmongDemes"/>
+      </R0AmongDemes>
+
+      <becomeUninfectiousRate spec="SkylineVectorParameter" typeSet="@typeSet">
+        <skylineValues idref="becomeUninfectiousRate"/>
+      </becomeUninfectiousRate>
+
+      <samplingProportion spec="SkylineVectorParameter" typeSet="@typeSet" timesAreAges="true" origin="@origin">
+        <skylineValues idref="samplingProportion"/>
+      </samplingProportion>
+
+      <removalProb spec="SkylineVectorParameter" typeSet="@typeSet">
+        <skylineValues idref="removalProb"/>
+      </removalProb>
+
+      <typeSet id="typeSet" spec="bdmmprime.parameterization.TypeSet">
+        <typeTraitSet id="typeTraitSet" spec="TraitSetFromTaxonSet" traitname="type" delimiter="|" takeGroup="1"> 
+          <taxa id="TaxonSet.1" spec="TaxonSet" alignment="@HAera"/> 
+        </typeTraitSet>
+      </typeSet>
+
+    </parameterization>
+
+    <parameter id="typeFrequencies" spec="RealParameter" dimension="5" estimate="false" lower="0.0" name="frequencies" upper="1.0">0.0 0.0 0.0 0.0 1.0</parameter> 
+
+    <typeTraitSet idref="typeTraitSet"/>
+
+  </distribution>
+
+  <!-- Log file iterator, modify to match parameters from the analysis -->
+   <run spec="LogFileIterator">
+    <!-- Trace log for the analysis-->
+    <logFileState spec="TraceLogFileState" logFileName="/cluster/home/cguinat/scratch/BDMM_EUR/Mapper_GLM_29072021Sub/HAeraCombinedSub.log"> 
+
+      <logFileEntry spec="LogFileRealParameter" fieldName="originBDMMPrime"> 
+        <fieldParameter id="origin" spec="RealParameter" value="0.0"/>
+      </logFileEntry>
+
+       <!-- R0 -->
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0SVEpi.i3_DPCzech_Republic" fieldParameterIndex="0">
+        <fieldParameter id="R0" spec="RealParameter" value="0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0SVEpi.i3_DPGermany" fieldParameterIndex="1">
+        <fieldParameter idref="R0"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0SVEpi.i3_DPHungary" fieldParameterIndex="2">
+        <fieldParameter idref="R0"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0SVEpi.i3_DPPoland" fieldParameterIndex="3">
+        <fieldParameter idref="R0"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0SVEpi.i3_WB" fieldParameterIndex="4">
+        <fieldParameter idref="R0"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0SVEpi.i2_DPCzech_Republic" fieldParameterIndex="5">
+        <fieldParameter idref="R0"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0SVEpi.i2_DPGermany" fieldParameterIndex="6">
+        <fieldParameter idref="R0"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0SVEpi.i2_DPHungary" fieldParameterIndex="7">
+        <fieldParameter idref="R0"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0SVEpi.i2_DPPoland" fieldParameterIndex="8">
+        <fieldParameter idref="R0"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0SVEpi.i2_WB" fieldParameterIndex="9">
+        <fieldParameter idref="R0"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0SVEpi.i1_DPCzech_Republic" fieldParameterIndex="10">
+        <fieldParameter idref="R0"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0SVEpi.i1_DPGermany" fieldParameterIndex="11">
+        <fieldParameter idref="R0"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0SVEpi.i1_DPHungary" fieldParameterIndex="12">
+        <fieldParameter idref="R0"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0SVEpi.i1_DPPoland" fieldParameterIndex="13">
+        <fieldParameter idref="R0"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0SVEpi.i1_WB" fieldParameterIndex="14">
+        <fieldParameter idref="R0"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0SVEpi.i0_DPCzech_Republic" fieldParameterIndex="15">
+        <fieldParameter idref="R0"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0SVEpi.i0_DPGermany" fieldParameterIndex="16">
+        <fieldParameter idref="R0"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0SVEpi.i0_DPHungary" fieldParameterIndex="17">
+        <fieldParameter idref="R0"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0SVEpi.i0_DPPoland" fieldParameterIndex="18">
+        <fieldParameter idref="R0"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0SVEpi.i0_WB" fieldParameterIndex="19">
+        <fieldParameter idref="R0"/>
+      </logFileEntry>
+      
+      <!-- BecomeUninfectious rates -->
+      <logFileEntry spec="LogFileRealParameter" fieldName="becomeUninfectiousRateSVEpi.DPCzech_Republic" fieldParameterIndex="0"> 
+        <fieldParameter id="becomeUninfectiousRate" spec="RealParameter" value="0.0 0.0 0.0 0.0 0.0" />
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="becomeUninfectiousRateSVEpi.DPGermany" fieldParameterIndex="1">
+        <fieldParameter idref="becomeUninfectiousRate" />
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="becomeUninfectiousRateSVEpi.DPHungary" fieldParameterIndex="2">
+        <fieldParameter idref="becomeUninfectiousRate" />
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="becomeUninfectiousRateSVEpi.DPPoland" fieldParameterIndex="3">
+        <fieldParameter idref="becomeUninfectiousRate" />
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="becomeUninfectiousRateSVEpi.WB" fieldParameterIndex="4">
+        <fieldParameter idref="becomeUninfectiousRate" />
+      </logFileEntry>
+
+      <!-- R0AmongDemes -->
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0AmongDemesSMEpi.DPCzech_Republic_to_DPGermany" fieldParameterIndex="0">
+        <fieldParameter id="R0AmongDemes" spec="RealParameter" value="0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0"/>  
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0AmongDemesSMEpi.DPCzech_Republic_to_DPHungary" fieldParameterIndex="1">
+        <fieldParameter idref="R0AmongDemes"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0AmongDemesSMEpi.DPCzech_Republic_to_DPPoland" fieldParameterIndex="2">
+        <fieldParameter idref="R0AmongDemes"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0AmongDemesSMEpi.DPCzech_Republic_to_WB" fieldParameterIndex="3">
+        <fieldParameter idref="R0AmongDemes"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0AmongDemesSMEpi.DPGermany_to_DPCzech_Republic" fieldParameterIndex="4">
+        <fieldParameter idref="R0AmongDemes"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0AmongDemesSMEpi.DPGermany_to_DPHungary" fieldParameterIndex="5">
+        <fieldParameter idref="R0AmongDemes"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0AmongDemesSMEpi.DPGermany_to_DPPoland" fieldParameterIndex="6">
+        <fieldParameter idref="R0AmongDemes"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0AmongDemesSMEpi.DPGermany_to_WB" fieldParameterIndex="7">
+        <fieldParameter idref="R0AmongDemes"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0AmongDemesSMEpi.DPHungary_to_DPCzech_Republic" fieldParameterIndex="8">
+        <fieldParameter idref="R0AmongDemes"/>
+      </logFileEntry>
+       <logFileEntry spec="LogFileRealParameter" fieldName="R0AmongDemesSMEpi.DPHungary_to_DPGermany" fieldParameterIndex="9">
+        <fieldParameter idref="R0AmongDemes"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0AmongDemesSMEpi.DPHungary_to_DPPoland" fieldParameterIndex="10">
+        <fieldParameter idref="R0AmongDemes"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0AmongDemesSMEpi.DPHungary_to_WB" fieldParameterIndex="11">
+        <fieldParameter idref="R0AmongDemes"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0AmongDemesSMEpi.DPPoland_to_DPCzech_Republic" fieldParameterIndex="12">
+        <fieldParameter idref="R0AmongDemes"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0AmongDemesSMEpi.DPPoland_to_DPGermany" fieldParameterIndex="13">
+        <fieldParameter idref="R0AmongDemes"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0AmongDemesSMEpi.DPPoland_to_DPHungary" fieldParameterIndex="14">
+        <fieldParameter idref="R0AmongDemes"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0AmongDemesSMEpi.DPPoland_to_WB" fieldParameterIndex="15">
+        <fieldParameter idref="R0AmongDemes"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0AmongDemesSMEpi.WB_to_DPCzech_Republic" fieldParameterIndex="16">
+        <fieldParameter idref="R0AmongDemes"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0AmongDemesSMEpi.WB_to_DPGermany" fieldParameterIndex="17">
+        <fieldParameter idref="R0AmongDemes"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0AmongDemesSMEpi.WB_to_DPHungary" fieldParameterIndex="18">
+        <fieldParameter idref="R0AmongDemes"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="R0AmongDemesSMEpi.WB_to_DPPoland" fieldParameterIndex="19">
+        <fieldParameter idref="R0AmongDemes"/>
+      </logFileEntry>
+     
+      <!-- Sampling Proportions -->
+      <logFileEntry spec="LogFileRealParameter" fieldName="samplingProportionSVEpi.DPCzech_Republic" fieldParameterIndex="0">
+        <fieldParameter id="samplingProportion" spec="RealParameter" value="0.0 0.0 0.0 0.0 0.0"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="samplingProportionSVEpi.DPGermany" fieldParameterIndex="1">
+        <fieldParameter idref="samplingProportion"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="samplingProportionSVEpi.DPHungary" fieldParameterIndex="2">
+        <fieldParameter idref="samplingProportion"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="samplingProportionSVEpi.DPPoland" fieldParameterIndex="3">
+        <fieldParameter idref="samplingProportion"/>
+      </logFileEntry>
+      <logFileEntry spec="LogFileRealParameter" fieldName="samplingProportionSVEpi.WB" fieldParameterIndex="4">
+        <fieldParameter idref="samplingProportion"/>
+      </logFileEntry>
+       
+
+      <!-- Removal Probability -->
+      <logFileEntry spec="LogFileRealParameter" fieldName="removalProbSVEpi">
+        <fieldParameter id="removalProb" spec="RealParameter" value="0.0"/> 
+      </logFileEntry>
+
+    </logFileState>
+
+    <!-- Tree log for the analysis-->
+    <logFileState spec="TreeLogFileState" logFileName="/cluster/home/cguinat/scratch/BDMM_EUR/Mapper_GLM_29072021Sub/HAeraCombinedSub.trees"> 
+      <tree spec="Tree" id="tree"/>
+    </logFileState>
+
+
+    <logger spec="Logger"
+            logEvery="10">
+      <log idref="R0"/>
+      <log idref="R0AmongDemes"/>
+      <log idref="samplingProportion"/>
+    </logger>
+
+    <!-- Typed tree log-->
+    <logger spec="Logger" fileName="$(filebase).typed.trees" logEvery="1" mode="tree">
+        <log id="typeMappedTree" spec="TypeMappedTree" bdmmDistrib="@BDMMPrime" frequencies="@typeFrequencies" mapOnInit="false" remapOnLog="true" typeLabel="type" typeTraitSet="@typeTraitSet" untypedTree="@tree"/>
+    </logger>
+
+    <!-- Typed node tree log-->
+    <logger id="nodeTypedTreeLogger" spec="Logger" fileName="$(filebase).typed.node.trees" logEvery="1" mode="tree">
+      <log id="nodeTypedTree" spec="TypedNodeTreeLogger" typedTree="@typeMappedTree"/>
+    </logger>
+
+    <!-- Trajectories log-->
+    <logger spec="Logger" logEvery="1" fileName="$(filebase).TL.traj">
+      <log id="typedTrajectoryTL" spec="bdmmprime.trajectories.SampledTrajectory"
+           nParticles="4000"
+           useTauLeaping="true"
+           minLeapCount="100"
+           epsilon="0.03"
+           typeLabel="type"
+           typeMappedTree="@typeMappedTree"
+           parameterization="@EpiBDMMPrimeParameterization"/>
+    </logger>
+  </run>
+</beast>
+
